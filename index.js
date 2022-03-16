@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 const jwt_decode = require('jwt-decode');
 const { v4: uuidv4 } = require('uuid');
 require('express-async-errors');
@@ -28,6 +29,8 @@ setInterval(() => {
 
 const app = express();
 app.use(bodyParser.json());
+
+app.use(cors());
 
 app.post('/room/create', async function (req, res) {
     const [wt, sync] = await Promise.all([
