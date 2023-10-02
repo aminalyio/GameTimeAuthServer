@@ -35,7 +35,7 @@ app.use(cors());
 app.post('/room/create', async function (req, res) {
     const {name} = req.body;
     const [wt, sync] = await Promise.all([
-        axios.get(`${CONFIG.CAS_URL}/stream/token/`, {
+        axios.get(`${CONFIG.CAS_URL}/stream/token/v2/`, {
             headers: {
                 "Auth-API-Key":  CONFIG.API_KEY,
                 "Auth-API-Secret":  CONFIG.API_SECRET,
