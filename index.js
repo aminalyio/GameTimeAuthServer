@@ -33,6 +33,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.post('/room/create', async function (req, res) {
+    const {name} = req.body;
     const [wt, sync] = await Promise.all([
         axios.get(`${CONFIG.CAS_URL}/stream/token/`, {
             headers: {
@@ -48,17 +49,15 @@ app.post('/room/create', async function (req, res) {
         }),
     ])
 
-    const id = uuidv4();
-    const stream = req.body.stream;
+    const id = name || uuidv4();
     const wt_token = wt.data.token;
     const sync_token = sync.data.token;
     const exp = Math.min(jwt_decode(wt_token).exp, jwt_decode(sync_token).exp) * 1000;
 
     ROOMS[id] = {
-        id,
+        name: id,
         wt_token,
         sync_token,
-        stream,
         exp,
     };
 
@@ -68,7 +67,7 @@ app.post('/room/create', async function (req, res) {
 app.get('/room/:id', function (req, res) {
     const id = req.params.id;
     if (!ROOMS[id]) {
-        res.status(404);
+        res.status(404).json({error: 'Room not found'});
     } else {
         res.json(ROOMS[id])
     }
@@ -76,7 +75,7 @@ app.get('/room/:id', function (req, res) {
 
 app.use(function (e, req, res, next) {
     console.error(e);
-    res.status(500).send('Error');
+    res.status(500).json({error: e.message});
 });
 
 const server = http.createServer(app);
