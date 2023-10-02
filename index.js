@@ -34,34 +34,36 @@ app.use(cors());
 
 app.post('/room/create', async function (req, res) {
     const {name} = req.body;
-    const [wt, sync] = await Promise.all([
-        axios.get(`${CONFIG.CAS_URL}/stream/token/v2/`, {
-            headers: {
-                "Auth-API-Key":  CONFIG.API_KEY,
-                "Auth-API-Secret":  CONFIG.API_SECRET,
-            }
-        }),
-        axios.get(`${CONFIG.CAS_URL}/sync/token/`, {
-            headers: {
-                "Auth-API-Key":  CONFIG.API_KEY,
-                "Auth-API-Secret":  CONFIG.API_SECRET,
-            }
-        }),
-    ])
-
     const id = name || uuidv4();
-    const wt_token = wt.data.token;
-    const sync_token = sync.data.token;
-    const exp = Math.min(jwt_decode(wt_token).exp, jwt_decode(sync_token).exp) * 1000;
+    if (!ROOMS[id]) {
+        const [wt, sync] = await Promise.all([
+            axios.get(`${CONFIG.CAS_URL}/stream/token/v2/`, {
+                headers: {
+                    "Auth-API-Key": CONFIG.API_KEY,
+                    "Auth-API-Secret": CONFIG.API_SECRET,
+                }
+            }),
+            axios.get(`${CONFIG.CAS_URL}/sync/token/`, {
+                headers: {
+                    "Auth-API-Key": CONFIG.API_KEY,
+                    "Auth-API-Secret": CONFIG.API_SECRET,
+                }
+            }),
+        ])
 
-    ROOMS[id] = {
-        name: id,
-        wt_token,
-        sync_token,
-        exp,
-    };
+        const wt_token = wt.data.token;
+        const sync_token = sync.data.token;
+        const exp = Math.min(jwt_decode(wt_token).exp, jwt_decode(sync_token).exp) * 1000;
 
-    res.json(ROOMS[id])
+        ROOMS[id] = {
+            name: id,
+            wt_token,
+            sync_token,
+            exp,
+        };
+    }
+
+    res.json(ROOMS[id]);
 });
 
 app.get('/room/:id', function (req, res) {
