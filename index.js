@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.post('/room/create', async function (req, res) {
-    const {name} = req.body;
+    const {name, playerId, videoId} = req.body;
     const id = name || uuidv4();
     if (!ROOMS[id]) {
         const [wt, sync] = await Promise.all([
@@ -51,14 +51,16 @@ app.post('/room/create', async function (req, res) {
             }),
         ])
 
-        const wt_token = wt.data.token;
-        const sync_token = sync.data.token;
-        const exp = Math.min(jwt_decode(wt_token).exp, jwt_decode(sync_token).exp) * 1000;
+        const wtToken = wt.data.token;
+        const syncToken = sync.data.token;
+        const exp = Math.min(jwt_decode(wtToken).exp, jwt_decode(syncToken).exp) * 1000;
 
         ROOMS[id] = {
             name: id,
-            wt_token,
-            sync_token,
+            playerId, 
+            videoId,
+            wtToken,
+            syncToken,
             exp,
         };
     }
