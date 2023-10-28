@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const CONFIG = {
-    PORT: process.env.SERVER_PORT || 80,
+    PORT: process.env.PORT || 80,
     CAS_URL: process.env.CAS_URL,
     API_SECRET: process.env.API_SECRET,
     API_KEY: process.env.API_KEY,
